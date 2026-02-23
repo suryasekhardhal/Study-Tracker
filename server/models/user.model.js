@@ -50,6 +50,10 @@ const userSchema = new Schema({
     profilePicture: {
         type: String,
         trim: true
+    },
+    refreshToken: {
+        type: String,
+        trim: true
     }
 },{timestamps: true});
 
