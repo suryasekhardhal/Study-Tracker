@@ -49,7 +49,8 @@ const userSchema = new Schema({
     },
     profilePicture: {
         type: String,
-        trim: true
+        trim: true,
+        default:""
     },
     refreshToken: {
         type: String,
