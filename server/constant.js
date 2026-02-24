@@ -1,1 +1,1 @@
-export const DB_NAME = "study tracker"
+export const DB_NAME = "study_tracker"

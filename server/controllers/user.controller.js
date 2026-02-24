@@ -21,7 +21,7 @@ const generateAccessAndRefreshToken=async(userId)=>{
 }
 
 const userRegister = asyncHandler(async (req, res) => {
-    const {name, email, password, githubUsername} = req.body;
+    const {name, email, password} = req.body;
     if(!name || !email || !password){
         throw new ApiError(400,"All fields are required");
     }
@@ -31,23 +31,11 @@ const userRegister = asyncHandler(async (req, res) => {
         throw new ApiError(400,"User exist with this email please login")
     }
 
-    const {image} = req.file?.path;
-    if(!image){
-        throw new ApiError(400,"Image is required");
-    }
-
-    const profilePictureUrl = await uploadOnCloudinary(image);
-
-    if(!profilePictureUrl){
-        throw new ApiError(400,"Failed to upload on cloudinary")
-    }
 
     const user =await User.create({
            name,
            email,
-           password,
-           githubUsername,
-           profilePicture:profilePictureUrl
+           password
     })
 
     if (!user) {
