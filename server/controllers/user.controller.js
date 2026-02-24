@@ -76,7 +76,7 @@ const userLogin = asyncHandler(async(req,res)=>{
     if (!email || !password) {
         throw new ApiError(400,"email and password is required")
     }
-    const user = await User.findOne({email})
+    const user = await User.findOne({email}).select("+password")
     if (!user) {
         throw new ApiError(401,"User not found")
     }
@@ -86,7 +86,7 @@ const userLogin = asyncHandler(async(req,res)=>{
     }
     const {accessToken,refreshToken} = await generateAccessAndRefreshToken(user._id)
 
-    const loggedInUser = await User.findOne(user._id).select("-password -refreshtoken")
+    const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
     
     const accessOptions = {
         httpOnly:true,
@@ -101,16 +101,49 @@ const userLogin = asyncHandler(async(req,res)=>{
         maxAge:7*24*60*60*1000
     }
 
-    return res.status(201)
+    return res.status(200)
     .cookie("accessToken",accessToken,accessOptions)
     .cookie("refreshToken",refreshToken,refreshOptions)
     .json(new ApiResponse(
-        201,
+        200,
         loggedInUser,
         "User logged in Successfully"
     ))
 })
 
+const userLogout = asyncHandler(async(req,res)=>{
+    if (!req.user) {
+        throw new ApiError(400,"Invalid user")
+    }
+    // await User.findByIdAndUpdate(
+    //     req.user?._id,
+    //     {
+    //         $set:{
+    //             refreshToken:undefined
+    //         }
+    //     },
+    //     {
+    //         new:true
+    //     }
+    // )
 
+    await User.findByIdAndUpdate(req.user._id, {
+    $unset: { refreshToken: 1 }
+})
 
-export {userRegister,userLogin}
+    const options = {
+        httpOnly:true,
+        secure:process.env.NODE_ENV==="production",
+        sameSite:"strict"
+    }
+    return res.status(201)
+    .clearCookie("accessToken",options)
+    .clearCookie("refreshToken",options)
+    .json(new ApiResponse(
+        201,
+        null,
+        "User loged Out Successfully"
+    ))
+})
+
+export {userRegister,userLogin,userLogout}
