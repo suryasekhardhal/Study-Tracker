@@ -2,7 +2,7 @@ import { User } from "../models/user.model.js";
 import {asyncHandler} from "../utils/AsyncHandler.js"
 import {ApiError} from "../utils/ApiError.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
-// import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const generateAccessAndRefreshToken=async(userId)=>{
     try {
@@ -146,4 +146,96 @@ const userLogout = asyncHandler(async(req,res)=>{
     ))
 })
 
-export {userRegister,userLogin,userLogout}
+const refreshToken = asyncHandler(async(req,res)=>{
+    const incomingRefreshToken = req.cookie.refreshToken || req.body.refreshToken
+    if (!incomingRefreshToken) {
+        throw new ApiError(400,"Invalid refresh Token")
+    }
+    try {
+        const decodedToken = jwt.verify(incomingRefreshToken,REFRESH_TOKEN_SECRET)
+        const user = User.findById(decodedToken._id)
+        if (!user) {
+            throw new ApiError(400,"Invalid refresh token")
+        }
+        if (incomingRefreshToken !== user?.refreshToken) {
+            throw new ApiError(400,"Refresh token use or expired")
+        }
+        
+        const accessOptions={
+            httpOnly:true,
+            secure:process.env.NODE_ENV==="production",
+            sameSite:"secure",
+            maxAge:15*60*1000
+        }
+
+        const refreshOptions={
+            httpOnly:true,
+            secure:process.env.NODE_ENV==="production",
+            sameSite:"secure",
+            maxAge:7*24*60*60*1000
+        }
+        const {accessToken,newRefreshToken} = await generateAccessAndRefreshToken(user._id)
+        return res.status(200)
+        .cookie("accessToken",accessToken,accessOptions)
+        .cookie("refreshToken",newRefreshToken,refreshOptions)
+        .json(new ApiResponse(
+            200,
+            "Successfully add access token"
+        ))
+    } catch (error) {
+        throw new ApiError(401,"invalid refresh token")
+    }
+})
+
+const getCurrentUser = asyncHandler(async(req,res)=>{
+    return res.status(200)
+    .json(new ApiResponse(
+        200,
+        req.user,
+        "User fetched succesfully"
+    ))
+})
+
+const updateProfile = asyncHandler(async(req,res)=>{
+    const {name,githubUsername} = req.body
+    if (!name || !githubUsername) {
+        throw new ApiError(400,"Name or GithubUsername required")
+    }
+    const {imageLocalUrl}=req.file?.path
+    if (!imageLocalUrl) {
+        throw new ApiError(400,"ProfileImage file is required")
+    }
+    const profileImage = await uploadOnCloudinary(image);
+    if (!profileImage) {
+        throw new ApiError(400,"Failed to upload on cloudinary")
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set:{
+                name:name,
+                githubUsername:githubUsername,
+                profilePicture:profileImage.url
+            }
+        }
+    ).select("-password")
+
+    return res.status(200)
+    .json(new ApiResponse(
+        200,
+        user,
+        "User profile updated successfully"
+    ))
+
+
+})
+
+const changePassword = asyncHandler(async(req,res)=>{
+    const {oldPassword,newPassword} = req.body
+    if (!oldPassword || !newPassword) {
+        throw new ApiError(400,"OldPassword")
+    }
+})
+
+export {userRegister,userLogin,userLogout,refreshToken,getCurrentUser,updateProfile}
