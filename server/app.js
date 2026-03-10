@@ -11,7 +11,9 @@ app.use(express.static("public"))
 app.use(cookieParser());
 
 import userRouter from "./routes/user.route.js"
+import studyLogRouter from "./routes/studyLog.route.js"
 
 app.use("/api/v1/user",userRouter)
+app.use("/api/v1/study-log", studyLogRouter)
 
 export {app}
