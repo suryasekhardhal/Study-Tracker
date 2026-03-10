@@ -213,6 +213,60 @@ const getCalendarHeatmap = asyncHandler(async (req, res) => {
     );
 });
 
+const getStudyStreak = asyncHandler(async (req, res) => {
+
+    const userId = req.user._id;
+
+    const logs = await StudyLog.find({ userId })
+        .sort({ date: 1 })
+        .select("date");
+
+    if (!logs.length) {
+        return res.status(200).json(
+            new ApiResponse(200, {
+                currentStreak: 0,
+                longestStreak: 0
+            }, "No study logs yet")
+        );
+    }
+
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let tempStreak = 1;
+
+    for (let i = 1; i < logs.length; i++) {
+
+        const prev = new Date(logs[i - 1].date);
+        const curr = new Date(logs[i].date);
+
+        const diff =
+            (curr - prev) / (1000 * 60 * 60 * 24);
+
+        if (diff === 1) {
+            tempStreak++;
+        } else {
+            tempStreak = 1;
+        }
+
+        longestStreak = Math.max(longestStreak, tempStreak);
+    }
+
+    const today = new Date();
+    const lastLog = new Date(logs[logs.length - 1].date);
+
+    const diffFromToday =
+        Math.floor((today - lastLog) / (1000 * 60 * 60 * 24));
+
+    currentStreak = diffFromToday <= 1 ? tempStreak : 0;
+
+    return res.status(200).json(
+        new ApiResponse(200, {
+            currentStreak,
+            longestStreak
+        }, "Study streak fetched")
+    );
+});
+
 
 
 export {
@@ -222,5 +276,6 @@ export {
     getLogsByDateRange,
     deleteStudyLog,
     getStudyStats,
-    getCalendarHeatmap
+    getCalendarHeatmap,
+    getStudyStreak
 };

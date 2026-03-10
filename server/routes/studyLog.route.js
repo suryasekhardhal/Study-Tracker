@@ -5,7 +5,8 @@ import {
     getLogsByDateRange,
     deleteStudyLog,
     getStudyStats,
-    getCalendarHeatmap
+    getCalendarHeatmap,
+    getStudyStreak
 } from "../controllers/studylog.controller.js"
 import { verifyJWT } from "../middlewares/auth.middleware.js"
 import { Router } from "express"
@@ -19,5 +20,6 @@ router.route("/range").get(verifyJWT, getLogsByDateRange);
 router.route("/:logId").delete(verifyJWT, deleteStudyLog);
 router.route("/stats").get(verifyJWT, getStudyStats);
 router.route("/calendar").get(verifyJWT, getCalendarHeatmap);
+router.route("/streak").get(verifyJWT, getStudyStreak);
 
 export default router;
