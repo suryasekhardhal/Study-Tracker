@@ -102,8 +102,8 @@ const userLogin = asyncHandler(async(req,res)=>{
     }
 
     return res.status(200)
-    .cookie("accessToken",accessToken,accessOptions)
-    .cookie("refreshToken",refreshToken,refreshOptions)
+    .cookies("accessToken",accessToken,accessOptions)
+    .cookies("refreshToken",refreshToken,refreshOptions)
     .json(new ApiResponse(
         200,
         loggedInUser,
@@ -153,7 +153,7 @@ const refreshToken = asyncHandler(async(req,res)=>{
     }
     try {
         const decodedToken = jwt.verify(incomingRefreshToken,REFRESH_TOKEN_SECRET)
-        const user = User.findById(decodedToken._id)
+        const user = await User.findById(decodedToken._id)
         if (!user) {
             throw new ApiError(400,"Invalid refresh token")
         }
@@ -176,8 +176,8 @@ const refreshToken = asyncHandler(async(req,res)=>{
         }
         const {accessToken,newRefreshToken} = await generateAccessAndRefreshToken(user._id)
         return res.status(200)
-        .cookie("accessToken",accessToken,accessOptions)
-        .cookie("refreshToken",newRefreshToken,refreshOptions)
+        .cookies("accessToken",accessToken,accessOptions)
+        .cookies("refreshToken",newRefreshToken,refreshOptions)
         .json(new ApiResponse(
             200,
             "Successfully add access token"
@@ -223,6 +223,7 @@ const forgotPassword = asyncHandler(async(req,res)=>{
     
 })
 
+// need fix
 const resetPassword = asyncHandler(async(req,res)=>{
         const {token} = req.params
         const {newPassword}= req.body

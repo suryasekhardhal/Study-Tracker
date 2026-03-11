@@ -18,7 +18,7 @@ const updateProfile = asyncHandler(async(req,res)=>{
     if (!name || !githubUsername) {
         throw new ApiError(400,"Name or GithubUsername required")
     }
-    const {imageLocalUrl}=req.file?.path
+    const imageLocalUrl = req.file?.path
     if (!imageLocalUrl) {
         throw new ApiError(400,"ProfileImage file is required")
     }

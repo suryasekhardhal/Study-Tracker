@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import {fetchCodeforcesProblem} from "../service/problemFetcher.service.js"
+import mongoose from "mongoose";
 
 const addProblem = asyncHandler(async (req, res) => {
     const { url } = req.body;

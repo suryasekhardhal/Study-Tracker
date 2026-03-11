@@ -6,11 +6,12 @@ import {userRegister,userLogin,userLogout,refreshToken,resetPassword,forgotPassw
 import { Router } from "express"
 import {verifyJWT} from "../middlewares/auth.middleware.js"
 import{upload} from "../middlewares/multer.middleware.js"
+import { authLimiter } from "../middlewares/rateLimit.middleware.js"
 
 const router = Router();
 //public routes
-router.route("/register").post(userRegister)
-router.route("/login").post(userLogin)
+router.route("/register").post(authLimiter,userRegister)
+router.route("/login").post(authLimiter,userLogin)
 router.route("/refresh-token").post(refreshToken)
 router.route("/forgot-password").post(forgotPassword)
 router.route("/reset-password/:token").post(resetPassword)
