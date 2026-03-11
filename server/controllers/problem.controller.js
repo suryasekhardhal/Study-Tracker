@@ -58,6 +58,78 @@ const getUserProblems = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, problems, "User problems fetched successfully"));
 });
 
+const deleteProblem = asyncHandler(async (req, res) => {
+    const { problemId } = req.params;
+    const userId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(problemId)) {
+        throw new ApiError(400, "Invalid problem ID");
+    }
+
+    const deletedProblem = await Problem.findOneAndDelete({
+        _id: problemId,
+        userId
+    });
+
+    if (!deletedProblem) {
+        throw new ApiError(404, "Problem not found or you are not authorized to delete it");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, deletedProblem, "Problem deleted successfully")
+    );
+});
+
+const problemStats = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
 
 
-export { addProblem, getUserProblems }
+    const problemCount = await Problem.countDocuments({ userId });
+    const difficultyStats = await Problem.aggregate([
+        {
+            $match:{userId}
+        },
+        {
+            $group: {
+                _id: "$difficultyLevel",
+                count: { $sum: 1 }
+            }
+        }
+    ])
+    const platformStats = await Problem.aggregate([
+        {
+            $match: { userId }
+        },
+        {
+            $group: {
+                _id: "$platform",
+                count: { $sum: 1 }
+            }
+        }
+    ])
+    const topicStats = await Problem.aggregate([
+        {
+            $match: { userId }
+        },
+        {
+            $unwind: "$topics"
+        },
+        {
+            $group: {
+                _id: "$topics",
+                count: { $sum: 1 }
+            }
+        }
+    ])
+
+    return res.status(200).json(
+        new ApiResponse(200, {
+            problemCount,
+            difficultyStats,
+            platformStats,
+            topicStats
+        }, "Problem statistics fetched successfully")
+    );
+});
+
+export { addProblem, getUserProblems, deleteProblem, problemStats }
