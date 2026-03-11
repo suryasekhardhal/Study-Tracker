@@ -1,3 +1,41 @@
+// import axios from "axios";
+// import * as cheerio from "cheerio";
+
+// export const fetchCodeforcesProblem = async (url) => {
+
+//     const response = await axios.get(url, {
+//         headers: {
+//             "User-Agent": "Mozilla/5.0",
+//             "Accept-Language": "en-US,en;q=0.9"
+//         }
+//     });
+
+//     const $ = cheerio.load(response.data);
+
+//     const titleText = $(".problem-statement .title").text().trim();
+
+//     const problemName = titleText.split(".")[1]?.trim();
+
+//     const topics = [];
+
+//     $(".tag-box").each((i, el) => {
+//         topics.push($(el).text().trim());
+//     });
+
+//     const slugParts = url.split("/problem/")[1].split("/");
+
+//     const problemSlug = `${slugParts[0]}-${slugParts[1]}`;
+
+//     return {
+//         platform: "Codeforces",
+//         problemSlug,
+//         problemName,
+//         difficultyLevel: "Easy",
+//         topics
+//     };
+// };
+
+
 import axios from "axios";
 
 export const fetchCodeforcesProblem = async (url) => {

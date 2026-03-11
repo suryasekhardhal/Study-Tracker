@@ -8,7 +8,7 @@ const problemSchema = new Schema({
     },
     platform:{
         type:String,
-        enum:["LeetCode","HackerRank","CodeSignal","Codewars","codeforces","AtCoder","InterviewBit","GeeksforGeeks"],
+        enum:["LeetCode","HackerRank","CodeSignal","Codewars","Codeforces","AtCoder","InterviewBit","GeeksforGeeks"],
         required:true
     },
     problemName:{
@@ -25,7 +25,7 @@ const problemSchema = new Schema({
     },
     topics:[{
         type:String,
-        enum:["Arrays","Strings","Trees","Graphs","Dynamic Programming","Backtracking","Greedy"],
+        // enum:["Arrays","Strings","Trees","Graphs","Dynamic Programming","Backtracking","Greedy"],
         required:true
     }],
     solvedAt:{

@@ -23,7 +23,8 @@ const addProblem = asyncHandler(async (req, res) => {
         });
 
         if (existedProblem) {
-            throw new ApiError(409, "Problem already exists");
+            return res.status(200)
+            .json(new ApiResponse(200, null, "Problem already exists"));
         }
 
         const newProblem = new Problem({
@@ -42,4 +43,21 @@ const addProblem = asyncHandler(async (req, res) => {
     
 });
 
-export {addProblem}
+const getUserProblems = asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const problems = await Problem.find({ userId: req.user._id })
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit);
+
+    const total = await Problem.countDocuments({ userId: req.user._id });
+
+    return res.status(200)
+    .json(new ApiResponse(200, problems, "User problems fetched successfully"));
+});
+
+
+
+export { addProblem, getUserProblems }

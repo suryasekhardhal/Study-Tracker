@@ -213,6 +213,12 @@ const getCalendarHeatmap = asyncHandler(async (req, res) => {
     );
 });
 
+/*
+-----------------------------------------
+ STUDY STREAK
+-----------------------------------------
+*/
+
 const getStudyStreak = asyncHandler(async (req, res) => {
 
     const userId = req.user._id;
