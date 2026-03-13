@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { apiLimiter} from "./middlewares/rateLimit.middleware.js"; 
 const app = express();
+import "./cron/weeklyReport.cron.js";
 
 app.use(cors({origin: process.env.CORS_ORIGIN, credentials: true}));
 app.use(express.json({limit:"16kb"}));
