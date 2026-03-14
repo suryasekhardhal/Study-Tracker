@@ -4,6 +4,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import crypto from "crypto"
 import { User } from "../models/user.model.js";
+import jwt from "jsonwebtoken"
 const generateAccessAndRefreshToken=async(userId)=>{
     try {
         const user = await User.findById(userId);
@@ -102,13 +103,16 @@ const userLogin = asyncHandler(async(req,res)=>{
     }
 
     return res.status(200)
-    .cookies("accessToken",accessToken,accessOptions)
-    .cookies("refreshToken",refreshToken,refreshOptions)
+    .cookie("accessToken",accessToken,accessOptions)
+    .cookie("refreshToken",refreshToken,refreshOptions)
     .json(new ApiResponse(
-        200,
-        loggedInUser,
-        "User logged in Successfully"
-    ))
+    200,
+    {
+        user: loggedInUser,
+        accessToken
+    },
+    "User logged in Successfully"
+))
 })
 
 const userLogout = asyncHandler(async(req,res)=>{
@@ -147,7 +151,7 @@ const userLogout = asyncHandler(async(req,res)=>{
 })
 
 const refreshToken = asyncHandler(async(req,res)=>{
-    const incomingRefreshToken = req.cookie.refreshToken || req.body.refreshToken
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
     if (!incomingRefreshToken) {
         throw new ApiError(400,"Invalid refresh Token")
     }
@@ -176,8 +180,8 @@ const refreshToken = asyncHandler(async(req,res)=>{
         }
         const {accessToken,newRefreshToken} = await generateAccessAndRefreshToken(user._id)
         return res.status(200)
-        .cookies("accessToken",accessToken,accessOptions)
-        .cookies("refreshToken",newRefreshToken,refreshOptions)
+        .cookie("accessToken",accessToken,accessOptions)
+        .cookie("refreshToken",newRefreshToken,refreshOptions)
         .json(new ApiResponse(
             200,
             "Successfully add access token"
@@ -245,7 +249,7 @@ const resetPassword = asyncHandler(async(req,res)=>{
         .digest("hex")
 
         const user = await User.findOne({
-            passwordResetToken: hashedToken,
+            passwordResetToken: hasedIncomingToken,
             passwordResetExpires: { $gt: Date.now() }
         })
 
@@ -269,3 +273,5 @@ const resetPassword = asyncHandler(async(req,res)=>{
 })
 
 export {userRegister,userLogin,userLogout,refreshToken,forgotPassword,resetPassword}
+
+

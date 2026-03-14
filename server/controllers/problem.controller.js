@@ -18,7 +18,7 @@ const addProblem = asyncHandler(async (req, res) => {
         }
 
         const existedProblem = await Problem.findOne({
-            userId: req.user.id,
+            userId: req.user._id,
             platform: problemData.platform,
             problemName: problemData.problemSlug
         });
@@ -29,7 +29,7 @@ const addProblem = asyncHandler(async (req, res) => {
         }
 
         const newProblem = new Problem({
-            userId: req.user.id,
+            userId: req.user._id,
             platform: problemData.platform,
             problemName: problemData.problemName,
             problemSlug: problemData.problemSlug,

@@ -143,7 +143,10 @@ const deleteStudyLog = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid log ID");
     }
 
-    const deletedLog = await StudyLog.findByIdAndDelete(logId);
+    const deletedLog = await StudyLog.findOneAndDelete({
+   _id: logId,
+   userId: req.user._id
+});
 
     if (!deletedLog) {
         throw new ApiError(404, "Study log not found");

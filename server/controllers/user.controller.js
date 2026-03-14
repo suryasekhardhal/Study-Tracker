@@ -22,7 +22,7 @@ const updateProfile = asyncHandler(async(req,res)=>{
     if (!imageLocalUrl) {
         throw new ApiError(400,"ProfileImage file is required")
     }
-    const profileImage = await uploadOnCloudinary(image);
+    const profileImage = await uploadOnCloudinary(imageLocalUrl);
     if (!profileImage) {
         throw new ApiError(400,"Failed to upload on cloudinary")
     }
